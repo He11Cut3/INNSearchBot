@@ -144,8 +144,6 @@ class Program
                 var response = await client.PostAsync(apiUrl, content);
                 var json = await response.Content.ReadAsStringAsync();
 
-                Console.WriteLine($"Response for INN {inn}: {json}");
-
                 if (response.IsSuccessStatusCode)
                 {
                     var companyData = JsonConvert.DeserializeObject<DadataResponse>(json);
@@ -168,12 +166,10 @@ class Program
             }
             catch (JsonReaderException ex)
             {
-                Console.WriteLine($"Ошибка чтения JSON для ИНН {inn}: {ex.Message}\nJSON");
                 results.Add($"ИНН: {inn} - ошибка обработки данных.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Общая ошибка для ИНН {inn}: {ex.Message}");
                 results.Add($"ИНН: {inn} - непредвиденная ошибка.");
             }
         }
@@ -226,10 +222,6 @@ class Program
             {
                 results.Add($"ИНН: {inn} - ошибка обработки данных.");
             }
-            catch (Exception ex)
-            {
-                results.Add($"ИНН: {inn} - непредвиденная ошибка.");
-            }
         }
 
         return string.Join("\n\n", results);
@@ -247,6 +239,8 @@ class Program
         {
             case var cmd when cmd.StartsWith("/inn") && lastCommand.Data != null:
                 return await GetCompanyInfoByINN(lastCommand.Data);
+            case var cmd when cmd.StartsWith("/okved") && lastCommand.Data != null:
+                return await GetOkvedInfoByINN(lastCommand.Data);
             case "/start":
                 return "Добро пожаловать! Используйте /help для получения списка доступных команд.";
             case "/help":
@@ -262,7 +256,7 @@ class Program
     public class LastCommand
     {
         public string Command { get; set; }
-        public string[] Data { get; set; } // Может использоваться для хранения ИНН или других данных
+        public string[] Data { get; set; }
     }
 
     public class DadataResponse
@@ -279,7 +273,7 @@ class Program
     public class SuggestionData
     {
         public AddressData address { get; set; }
-        public string okved { get; set; } // ОКВЭД как строка
+        public string okved { get; set; }
     }
 
     public class AddressData
